@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>刺桐港寻宝 · 海丝小学者</title>
+    <meta name="format-detection" content="telephone=no">
+    <meta property="og:title" content="丝路启航 · 刺桐港亲子闯关">
+    <meta property="og:description" content="月记窑、顺美陶瓷、海交馆三站连闯，扫码即玩。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://valruna-app.vercel.app/hai-si">
+    <link rel="manifest" href="./hai-si-manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="刺桐寻宝">
+    <meta name="theme-color" content="#2f4a66">
+    <!-- 字体与脚本走同域，避免国内屏蔽 Google / Tailwind CDN -->
+    <script src="./vendor/tailwind.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        jiqing: '#2F4A66',
+                        tianqing: '#6BA3A8',
+                        yuebai: '#F6F4EF',
+                        ruyao: '#B8CEC4',
+                        zhusha: '#B83636',
+                        liuli: '#C9A03D',
+                        songmo: '#3D4A42',
+                    },
+                    fontFamily: {
+                        display: ['"ZCOOL XiaoWei"', '"STKaiti"', '"KaiTi"', 'serif'],
+                        serif: ['"Noto Serif SC"', '"Songti SC"', '"SimSun"', 'serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        :root {
+            --jiqing-deep: #1e3348;
+            --jiqing: #2f4a66;
+            --tianqing: #6ba3a8;
+            --tianqing-light: #9ec5c8;
+            --yuebai: #f6f4ef;
+            --ruyao: #b8cec4;
+            --zhusha: #b83636;
+            --zhusha-deep: #8f2828;
+            --liuli: #c9a03d;
+            --liuli-light: #e8c878;
+            --songmo: #3d4a42;
+            --glass-border: rgba(255, 252, 245, 0.45);
+            --glass-bg: rgba(246, 244, 239, 0.72);
+            --glass-shadow: 0 18px 48px rgba(20, 38, 52, 0.18);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
+            color: var(--songmo);
+            overflow-x: hidden;
+            min-height: 100dvh;
+            background: linear-gradient(165deg, var(--jiqing-deep) 0%, var(--jiqing) 38%, var(--tianqing) 72%, var(--tianqing-light) 100%);
+        }
+
+        .font-display { font-family: "ZCOOL XiaoWei", "STKaiti", "KaiTi", serif; }
+
+        /* 背景装饰层 */
+        .scene-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .scene-bg::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0.14;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M0 60 Q30 20 60 60 T120 60' fill='none' stroke='%23f6f4ef' stroke-width='0.6'/%3E%3Cpath d='M0 80 Q40 50 80 80 T160 80' fill='none' stroke='%23f6f4ef' stroke-width='0.4'/%3E%3C/svg%3E");
+            background-size: 120px 120px;
+        }
+
+        .crackle-overlay {
+            position: absolute;
+            inset: -10%;
+            opacity: 0.06;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+            mix-blend-mode: soft-light;
+        }
+
+        .cloud-deco {
+            position: absolute;
+            width: 140px;
+            height: 56px;
+            opacity: 0.12;
+            background: radial-gradient(ellipse 50% 80% at 30% 50%, rgba(246,244,239,0.9) 0%, transparent 70%),
+                        radial-gradient(ellipse 45% 70% at 55% 45%, rgba(246,244,239,0.7) 0%, transparent 65%),
+                        radial-gradient(ellipse 40% 65% at 75% 55%, rgba(246,244,239,0.5) 0%, transparent 60%);
+        }
+        .cloud-deco-1 { top: 8%; left: -20px; }
+        .cloud-deco-2 { top: 22%; right: -30px; transform: scaleX(-1); }
+        .cloud-deco-3 { top: 48%; left: 10%; opacity: 0.08; width: 100px; }
+
+        .wave-layer {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 28vh;
+            min-height: 160px;
+        }
+
+        .wave-layer svg {
+            width: 200%;
+            height: 100%;
+            animation: waveDrift 14s ease-in-out infinite alternate;
+        }
+
+        @keyframes waveDrift {
+            from { transform: translateX(0); }
+            to { transform: translateX(-12%); }
+        }
+
+        /* 画卷展开转场 */
+        .view-panel {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hidden-section { display: none !important; }
+
+        .scroll-unfold {
+            animation: scrollUnfold 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            transform-origin: center top;
+        }
+
+        @keyframes scrollUnfold {
+            0% {
+                opacity: 0;
+                clip-path: inset(0 42% 8% 42% round 2rem);
+                transform: perspective(800px) rotateX(6deg) scaleY(0.92);
+                filter: blur(4px);
+            }
+            55% {
+                opacity: 0.85;
+                clip-path: inset(0 8% 2% 8% round 1.5rem);
+                filter: blur(0);
+            }
+            100% {
+                opacity: 1;
+                clip-path: inset(0 0 0 0 round 0);
+                transform: perspective(800px) rotateX(0) scaleY(1);
+                filter: blur(0);
+            }
+        }
+
+        /* 毛玻璃卡片 */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(18px) saturate(1.2);
+            -webkit-backdrop-filter: blur(18px) saturate(1.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.25rem;
+            box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        }
+
+        .glass-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            background: linear-gradient(135deg, rgba(255,255,255,0.35) 0%, transparent 42%);
+            opacity: 0.5;
+        }
+
+        .glass-panel-inner { position: relative; z-index: 1; }
+
+        /* 主视觉：帆船纹章 */
+        .emblem-ring {
+            width: 5.5rem;
+            height: 5.5rem;
+            border-radius: 50%;
+            background: linear-gradient(145deg, rgba(246,244,239,0.95), rgba(184,206,196,0.55));
+            border: 1px solid rgba(255, 252, 245, 0.7);
+            box-shadow: 0 12px 32px rgba(20, 38, 52, 0.2), inset 0 0 0 1px rgba(255,255,255,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: emblemFloat 4.5s ease-in-out infinite;
+        }
+
+        @keyframes emblemFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .divider-ornament {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--ruyao);
+        }
+        .divider-ornament::before,
+        .divider-ornament::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--ruyao), transparent);
+        }
+
+        /* 输入与按钮 */
+        .input-field {
+            width: 100%;
+            background: rgba(255, 252, 247, 0.88);
+            border: 1px solid rgba(107, 163, 168, 0.45);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            text-align: center;
+            font-size: 1.05rem;
+            letter-spacing: 0.08em;
+            color: var(--songmo);
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        .input-field::placeholder { color: rgba(61, 74, 66, 0.4); }
+        .input-field:focus {
+            outline: none;
+            border-color: var(--tianqing);
+            box-shadow: 0 0 0 3px rgba(107, 163, 168, 0.22);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            color: var(--yuebai);
+            background: linear-gradient(135deg, var(--zhusha) 0%, var(--zhusha-deep) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 28px rgba(143, 40, 40, 0.35);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+
+        .badge-team {
+            display: inline-block;
+            max-width: 9rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 0.35rem 0.65rem;
+            background: rgba(184, 206, 196, 0.35);
+            border: 1px solid rgba(184, 206, 196, 0.6);
+            border-radius: 0.35rem;
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+            color: var(--jiqing);
+        }
+
+        .badge-score {
+            padding: 0.35rem 0.85rem;
+            background: linear-gradient(135deg, var(--liuli-light), var(--liuli));
+            color: var(--jiqing-deep);
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            box-shadow: 0 4px 14px rgba(201, 160, 61, 0.35);
+        }
+
+        /* 进度条 */
+        .progress-track {
+            height: 3px;
+            background: rgba(47, 74, 102, 0.12);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--tianqing), var(--ruyao));
+            border-radius: inherit;
+            transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* 选项按钮 */
+        .option-btn {
+            width: 100%;
+            text-align: left;
+            padding: 1rem 1.15rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(107, 163, 168, 0.35);
+            background: rgba(255, 252, 247, 0.92);
+            color: var(--songmo);
+            font-size: 0.95rem;
+            line-height: 1.55;
+            letter-spacing: 0.04em;
+            transition: border-color 0.25s, background 0.25s, transform 0.2s;
+            box-shadow: 0 4px 14px rgba(20, 38, 52, 0.06);
+        }
+        .option-btn:not(:disabled):active { transform: scale(0.99); }
+        .option-btn:not(:disabled):hover {
+            border-color: var(--tianqing);
+            background: rgba(158, 197, 200, 0.12);
+        }
+        .option-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.65rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(47, 74, 102, 0.08);
+            color: var(--jiqing);
+            flex-shrink: 0;
+        }
+        .option-btn.is-correct {
+            border-color: #5a8f6e;
+            background: rgba(90, 143, 110, 0.12);
+            color: #2d5a40;
+        }
+        .option-btn.is-wrong {
+            border-color: var(--zhusha);
+            background: rgba(184, 54, 54, 0.08);
+            color: var(--zhusha-deep);
+        }
+        .option-btn.has-seal { padding-right: 3.5rem; }
+
+        /* 答错：宣纸震动 */
+        @keyframes paperShake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            12% { transform: translateX(-5px) rotate(-0.5deg); }
+            28% { transform: translateX(5px) rotate(0.5deg); }
+            44% { transform: translateX(-4px) rotate(-0.35deg); }
+            60% { transform: translateX(4px) rotate(0.35deg); }
+            76% { transform: translateX(-2px) rotate(-0.2deg); }
+        }
+        .paper-shake {
+            animation: paperShake 0.58s ease-in-out;
+        }
+
+        /* 答错：朱砂盖章 */
+        .seal-mark {
+            position: absolute;
+            right: 0.85rem;
+            top: 50%;
+            width: 2.35rem;
+            height: 2.35rem;
+            margin-top: -1.175rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "ZCOOL XiaoWei", serif;
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+            color: var(--zhusha);
+            border: 2px solid var(--zhusha);
+            border-radius: 0.2rem;
+            opacity: 0;
+            transform: scale(2.4) rotate(-14deg);
+            pointer-events: none;
+            box-shadow: inset 0 0 0 1px rgba(184, 54, 54, 0.15);
+        }
+        @keyframes sealSlam {
+            0% {
+                opacity: 0;
+                transform: scale(2.4) rotate(-14deg);
+            }
+            55% {
+                opacity: 0.92;
+                transform: scale(0.92) rotate(-9deg);
+            }
+            72% {
+                transform: scale(1.06) rotate(-11deg);
+            }
+            100% {
+                opacity: 0.82;
+                transform: scale(1) rotate(-10deg);
+            }
+        }
+        .seal-mark.is-stamped {
+            animation: sealSlam 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* 答对：琉璃朱印 */
+        .seal-mark-correct {
+            border-color: var(--liuli);
+            color: #8a6a1a;
+            background: rgba(232, 200, 120, 0.12);
+            box-shadow: 0 0 0 1px rgba(201, 160, 61, 0.25);
+        }
+        @keyframes sealSlamCorrect {
+            0% { opacity: 0; transform: scale(2.2) rotate(8deg); }
+            50% { opacity: 0.95; transform: scale(0.9) rotate(4deg); }
+            68% { transform: scale(1.05) rotate(5deg); }
+            100% { opacity: 0.9; transform: scale(1) rotate(4deg); }
+        }
+        .seal-mark-correct.is-stamped {
+            animation: sealSlamCorrect 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes paperGlow {
+            0%, 100% { box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.65); }
+            40% { box-shadow: 0 18px 48px rgba(201, 160, 61, 0.22), inset 0 0 24px rgba(232, 200, 120, 0.15); }
+        }
+        .paper-glow { animation: paperGlow 0.65s ease-out; }
+
+        /* 主题驿站 / 枢纽 */
+        .theme-card {
+            width: 100%;
+            text-align: left;
+            padding: 1rem 1.15rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(107, 163, 168, 0.35);
+            background: rgba(255, 252, 247, 0.92);
+            transition: transform 0.2s, border-color 0.2s, opacity 0.2s;
+            margin-bottom: 0.75rem;
+        }
+        .theme-card:not(:disabled):active { transform: scale(0.99); }
+        .theme-card.is-done { border-color: rgba(90, 143, 110, 0.5); background: rgba(90, 143, 110, 0.08); }
+        .theme-card.is-locked { opacity: 0.55; cursor: not-allowed; }
+        .theme-card.is-ready { border-color: var(--liuli); box-shadow: 0 4px 16px rgba(201, 160, 61, 0.2); }
+        .theme-card-status {
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            color: var(--tianqing);
+        }
+        .theme-card.is-done .theme-card-status { color: #5a8f6e; }
+        .btn-secondary {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            color: var(--jiqing);
+            background: rgba(255, 252, 247, 0.9);
+            border: 1px solid rgba(107, 163, 168, 0.45);
+            margin-top: 0.5rem;
+        }
+        .btn-link {
+            display: inline-block;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            color: var(--yuebai);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+        .checkpoint-score {
+            font-family: "ZCOOL XiaoWei", serif;
+            font-size: 2.5rem;
+            letter-spacing: 0.15em;
+            color: var(--jiqing-deep);
+        }
+
+        /* 结算勋章 */
+        .medal-seal {
+            width: 5rem;
+            height: 5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "ZCOOL XiaoWei", serif;
+            font-size: 1.35rem;
+            letter-spacing: 0.15em;
+            border: 2px solid;
+            box-shadow: 0 12px 28px rgba(20, 38, 52, 0.15);
+        }
+        .medal-gold {
+            color: var(--liuli);
+            border-color: var(--liuli);
+            background: radial-gradient(circle at 30% 30%, rgba(232,200,120,0.4), rgba(47,74,102,0.15));
+        }
+        .medal-silver {
+            color: #8a9baa;
+            border-color: #a8b8c8;
+            background: radial-gradient(circle at 30% 30%, rgba(200,210,220,0.5), rgba(47,74,102,0.1));
+        }
+        .medal-bronze {
+            color: var(--tianqing);
+            border-color: var(--ruyao);
+            background: radial-gradient(circle at 30% 30%, rgba(184,206,196,0.45), rgba(47,74,102,0.08));
+        }
+
+        .score-display {
+            font-family: "ZCOOL XiaoWei", serif;
+            font-size: 3.25rem;
+            line-height: 1;
+            letter-spacing: 0.12em;
+            background: linear-gradient(135deg, var(--liuli-light), var(--liuli), var(--zhusha));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(2rem + env(safe-area-inset-bottom));
+            transform: translateX(-50%) translateY(120%);
+            z-index: 100;
+            padding: 0.75rem 1.25rem;
+            background: rgba(30, 51, 72, 0.92);
+            color: var(--yuebai);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            letter-spacing: 0.08em;
+            opacity: 0;
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s;
+            pointer-events: none;
+            max-width: calc(100vw - 2rem);
+            text-align: center;
+        }
+        .toast.is-visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .title-reveal {
+            background: rgba(255, 252, 247, 0.65);
+            border: 1px solid rgba(201, 160, 61, 0.35);
+            border-radius: 0.75rem;
+            padding: 1.25rem 1rem;
+        }
+        .title-name {
+            font-family: "ZCOOL XiaoWei", serif;
+            font-size: 1.75rem;
+            letter-spacing: 0.22em;
+            color: var(--jiqing-deep);
+            margin: 0.5rem 0 0.35rem;
+        }
+        .title-name.title-glow {
+            background: linear-gradient(135deg, var(--liuli-light), var(--liuli), var(--zhusha));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        #wechat-tip {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 90;
+            padding: 0.5rem 0.75rem;
+            padding-top: max(0.5rem, env(safe-area-inset-top));
+            background: rgba(30, 51, 72, 0.92);
+            color: var(--yuebai);
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            text-align: center;
+            line-height: 1.45;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- 背景场景 -->
+    <div class="scene-bg" aria-hidden="true">
+        <div class="crackle-overlay"></div>
+        <div class="cloud-deco cloud-deco-1"></div>
+        <div class="cloud-deco cloud-deco-2"></div>
+        <div class="cloud-deco cloud-deco-3"></div>
+        <div class="wave-layer">
+            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill="rgba(246,244,239,0.08)" d="M0,192L48,197.3C96,203,192,213,288,218.7C384,224,480,224,576,208C672,192,768,160,864,154.7C960,149,1056,171,1152,181.3C1248,192,1344,192,1392,192L1440,192L1440,320L0,320Z"/>
+                <path fill="rgba(158,197,200,0.12)" d="M0,256L60,250.7C120,245,240,235,360,229.3C480,224,600,224,720,213.3C840,203,960,181,1080,181.3C1200,181,1320,203,1380,213.3L1440,224L1440,320L0,320Z"/>
+                <path fill="rgba(246,244,239,0.06)" d="M0,288L80,282.7C160,277,320,267,480,261.3C640,256,800,256,960,250.7C1120,245,1280,235,1360,229.3L1440,224L1440,320L0,320Z"/>
+            </svg>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="wechat-tip" class="hidden-section">微信内若无法加载，请点击右上角 ··· →「在浏览器中打开」</div>
+
+    <div id="app" class="relative z-10 max-w-md mx-auto min-h-[100dvh] flex flex-col px-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+
+        <!-- 开场 -->
+        <section id="view-start" class="view-panel flex-1 flex flex-col justify-center items-center scroll-unfold">
+            <div class="emblem-ring mb-6" aria-hidden="true">
+                <svg width="44" height="44" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 32c4-8 10-12 16-12s12 4 16 12" stroke="#2F4A66" stroke-width="1.2" stroke-linecap="round"/>
+                    <path d="M12 28h24M14 24h20" stroke="#6BA3A8" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+                    <path d="M24 8v6M20 12h8" stroke="#B83636" stroke-width="1.2" stroke-linecap="round"/>
+                    <path d="M18 18l12 0" stroke="#C9A03D" stroke-width="0.8" stroke-linecap="round"/>
+                </svg>
+            </div>
+
+            <p class="text-[0.7rem] tracking-[0.35em] text-yuebai/70 uppercase mb-2 font-serif">刺桐港 · 海丝小学者</p>
+            <h1 class="font-display text-[2.1rem] text-yuebai tracking-[0.28em] mb-2 drop-shadow-sm">丝路启航</h1>
+            <p class="text-tianqing-light/90 text-sm tracking-[0.22em] mb-2 font-serif">亲子家庭 · 现场闯关</p>
+            <p class="text-yuebai/50 text-xs tracking-[0.2em] mb-4 font-serif">月记窑 → 顺美陶瓷 → 海交馆 · 一站玩到底</p>
+            <p class="text-yuebai/40 text-[0.65rem] tracking-[0.1em] mb-10 font-serif leading-relaxed" id="mirror-hint"></p>
+
+            <div class="glass-panel relative w-full p-6">
+                <div class="glass-panel-inner text-center">
+                    <div class="divider-ornament text-xs tracking-[0.2em] mb-5 font-serif">开始闯关</div>
+                    <h2 class="text-base font-semibold text-songmo tracking-[0.12em] mb-4">请输入家庭名称</h2>
+                    <input
+                        type="text"
+                        id="team-input"
+                        maxlength="24"
+                        placeholder="例如：陈家亲子队"
+                        class="input-field mb-5"
+                        autocomplete="off"
+                    />
+                    <button type="button" id="btn-start" onclick="startGame()" class="btn-primary font-serif">
+                        扬帆起航
+                    </button>
+                    <p class="text-[0.7rem] text-songmo/50 mt-3 tracking-[0.08em]" id="resume-hint"></p>
+                    <button type="button" class="btn-secondary font-serif text-sm !mt-3" onclick="openHubFromStart()">
+                        查看闯关进度
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 主题枢纽 -->
+        <section id="view-hub" class="view-panel flex-1 flex flex-col hidden-section pt-2">
+            <p class="text-[0.7rem] tracking-[0.3em] text-yuebai/70 text-center mb-2 font-serif">航行枢纽</p>
+            <h2 class="font-display text-xl text-yuebai tracking-[0.2em] text-center mb-1">闯关进度</h2>
+            <p class="text-tianqing-light/80 text-xs tracking-[0.15em] text-center mb-5 font-serif">
+                家庭：<span id="hub-team-name" class="text-yuebai"></span>
+                · 累计 <span id="hub-total-score">0</span> 分
+            </p>
+            <div class="glass-panel relative w-full p-5 flex-1">
+                <div class="glass-panel-inner" id="theme-cards"></div>
+                <button type="button" id="hub-continue-btn" class="btn-primary font-serif mt-3 hidden-section" onclick="continueVoyageFromHub()">继续下一站</button>
+            </div>
+        </section>
+
+        <!-- 答题 -->
+        <section id="view-game" class="view-panel flex-1 flex flex-col hidden-section pt-2">
+            <header class="glass-panel relative p-4 mb-5 flex justify-between items-center gap-3">
+                <div class="glass-panel-inner min-w-0">
+                    <p class="text-[0.65rem] tracking-[0.2em] text-songmo/50 mb-1">闯关家庭</p>
+                    <span id="team-name-display" class="badge-team"></span>
+                </div>
+                <div class="glass-panel-inner shrink-0">
+                    <span class="badge-score">积分 <span id="score-display">0</span></span>
+                </div>
+            </header>
+
+            <div id="quiz-card-panel" class="glass-panel relative flex-1 flex flex-col p-6 min-h-0">
+                <div class="glass-panel-inner flex flex-col flex-1 min-h-0">
+                    <div class="mb-5">
+                        <div class="flex justify-between items-baseline mb-2">
+                            <span class="text-xs tracking-[0.25em] text-songmo/55 font-serif" id="question-progress">第 1 关 / 共 15 关</span>
+                            <span class="text-[0.65rem] text-tianqing tracking-widest" id="question-tag">研学印记</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progress-bar" style="width: 33.33%"></div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-songmo leading-relaxed tracking-[0.06em] mb-8 flex-1" id="question-text">
+                        题目载入中…
+                    </h3>
+
+                    <div id="options-container" class="space-y-3 mt-auto"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 主题通关 -->
+        <section id="view-theme-done" class="view-panel flex-1 flex flex-col justify-center items-center hidden-section">
+            <div class="emblem-ring mb-5" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 48 48" fill="none"><path d="M12 24h24M24 12v24" stroke="#C9A03D" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <h2 class="font-display text-[1.65rem] text-yuebai tracking-[0.22em] mb-1" id="checkpoint-title">驿站通关</h2>
+            <p class="text-tianqing-light/85 text-sm tracking-[0.16em] mb-6 font-serif" id="checkpoint-subtitle">本关已答完</p>
+            <div class="glass-panel relative w-full p-6">
+                <div class="glass-panel-inner text-center">
+                    <p class="text-xs tracking-[0.18em] text-songmo/55 mb-1">本关得分</p>
+                    <p class="checkpoint-score mb-1" id="checkpoint-theme-score">0</p>
+                    <p class="text-xs text-songmo/50 tracking-[0.1em] mb-6">累计 <span id="checkpoint-total-score">0</span> / 150 分</p>
+                    <p class="text-sm text-songmo/70 leading-relaxed tracking-[0.06em] mb-5" id="checkpoint-hint"></p>
+                    <button type="button" id="btn-complete-theme" class="btn-primary font-serif" onclick="completeThemeCheckpoint()">
+                        完成本关
+                    </button>
+                    <button type="button" id="btn-pause-hub" class="btn-secondary font-serif mt-3" onclick="pauseAtHub()">
+                        稍后继续
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 结算 -->
+        <section id="view-result" class="view-panel flex-1 flex flex-col justify-center items-center hidden-section">
+            <div id="medal-seal" class="medal-seal medal-gold mb-5" aria-hidden="true">印</div>
+
+            <h2 class="font-display text-[1.85rem] text-yuebai tracking-[0.25em] mb-2">航程圆满</h2>
+            <p class="text-tianqing-light/85 text-sm tracking-[0.18em] mb-8 font-serif">十五关隘已全部通关</p>
+
+            <div class="glass-panel relative w-full p-6">
+                <div class="glass-panel-inner text-center">
+                    <p class="text-xs tracking-[0.22em] text-songmo/50 mb-2 font-serif">累计积分</p>
+                    <div class="score-display mb-1" id="final-score">0</div>
+                    <p class="text-xs text-songmo/45 tracking-[0.12em] mb-6" id="score-caption">满分 150 分</p>
+
+                    <div class="divider-ornament text-xs tracking-[0.2em] mb-4 font-serif">册封称号</div>
+                    <div class="title-reveal">
+                        <p class="text-xs tracking-[0.18em] text-songmo/55">恭喜获得</p>
+                        <p class="title-name title-glow" id="final-title">丝路启航生</p>
+                        <p class="text-sm text-songmo/65 tracking-[0.08em] leading-relaxed" id="result-tier">继续探索刺桐文脉</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="./mirror-config.js"></script>
+    <script>
+        const MAX_SCORE = 150;
+        const POINTS_PER_QUESTION = 10;
+        const QUESTIONS_PER_THEME = 5;
+        const PROGRESS_KEY = 'hai-si-progress:v1';
+        /** @type {{ id: string; name: string; startIndex: number; endIndex: number; nextId: string | null; travelHint: string }[]} */
+        const THEMES = [
+            {
+                id: 'yueji',
+                name: '月记窑',
+                startIndex: 0,
+                endIndex: 4,
+                nextId: 'shunmei',
+                travelHint: '本关已完成。步行至顺美陶瓷后，在同一页面点击按钮继续下一站即可。',
+            },
+            {
+                id: 'shunmei',
+                name: '顺美陶瓷',
+                startIndex: 5,
+                endIndex: 9,
+                nextId: 'haijiao',
+                travelHint: '本关已完成。抵达海交馆后继续答题，无需再次扫码。',
+            },
+            {
+                id: 'haijiao',
+                name: '海交馆',
+                startIndex: 10,
+                endIndex: 14,
+                nextId: null,
+                travelHint: '三站全部完成，即可册封最终称号。',
+            },
+        ];
+
+        /** @type {{ theme: string; question: string; options: string[]; correct: number }[]} */
+        const quizData = [
+            // —— 月记窑 · 伍题 ——
+            {
+                theme: '月记窑',
+                question: '我们在月记窑看到的传统龙窑，它依山而建，长得像什么动物？',
+                options: ['盘卧的巨龙', '趴着的老虎', '展翅的凤凰'],
+                correct: 0,
+            },
+            {
+                theme: '月记窑',
+                question: '龙窑顺着山坡而建，最主要利用了山体的什么特点来帮助燃烧？',
+                options: ['坡度形成的抽力与通风', '山顶的积雪降温', '岩石反射阳光'],
+                correct: 0,
+            },
+            {
+                theme: '月记窑',
+                question: '德化被誉为中国著名的什么之乡，月记窑正是其中代表性的窑场？',
+                options: ['陶瓷之乡', '丝绸之乡', '茶叶之乡'],
+                correct: 0,
+            },
+            {
+                theme: '月记窑',
+                question: '在龙窑烧制过程中，木柴通常从窑的哪一端投入？',
+                options: ['窑头（低端）', '窑尾（高端）', '窑顶中央'],
+                correct: 0,
+            },
+            {
+                theme: '月记窑',
+                question: '参观龙窑时，窑内温度极高，我们最应当做到的是？',
+                options: ['不随意触碰、听从讲解员指引', '伸手感受窑温以作记录', '向窑内投掷湿木助燃'],
+                correct: 0,
+            },
+            // —— 顺美陶瓷 · 伍题 ——
+            {
+                theme: '顺美陶瓷',
+                question: '德化白瓷在古代被欧洲人赞誉为什么？',
+                options: ['东方黄金', '中国白 (Blanc de Chine)', '丝绸之光'],
+                correct: 1,
+            },
+            {
+                theme: '顺美陶瓷',
+                question: '德化白瓷胎体洁白细腻，一个重要原因是当地瓷土含铁量怎样？',
+                options: ['较低', '极高', '与普通黄土相同'],
+                correct: 0,
+            },
+            {
+                theme: '顺美陶瓷',
+                question: '在顺美陶瓷世界里，我们体验的是在白瓷素坯上进行什么？',
+                options: ['彩绘或贴花等装饰', '高温二次熔炼', '嵌入金属丝'],
+                correct: 0,
+            },
+            {
+                theme: '顺美陶瓷',
+                question: '「中国白」主要指的是哪一类瓷器？',
+                options: ['德化白瓷', '青花瓷', '唐三彩'],
+                correct: 0,
+            },
+            {
+                theme: '顺美陶瓷',
+                question: '顺美陶瓷文化展示位于哪个县？这里与月记窑同属著名的瓷都产区。',
+                options: ['德化县', '安溪县的茶园', '惠安县的石雕村'],
+                correct: 0,
+            },
+            // —— 海交馆 · 伍题 ——
+            {
+                theme: '海交馆',
+                question: '在海交馆里，宋代海船能做到「不沉水」的世界首创秘密技术是？',
+                options: ['逆风调戗', '水密隔舱', '蒸汽动力'],
+                correct: 1,
+            },
+            {
+                theme: '海交馆',
+                question: '泉州在古代还有一个因满城刺桐花而得的美名，叫做？',
+                options: ['刺桐港', '长安', '金陵'],
+                correct: 0,
+            },
+            {
+                theme: '海交馆',
+                question: '宋元时期，泉州港在海上的地位常被称作？',
+                options: ['东方第一大港', '内陆茶马古道', '北国冰港'],
+                correct: 0,
+            },
+            {
+                theme: '海交馆',
+                question: '「逆风调戗」是古代海船的一项什么技术？',
+                options: ['在逆风时调整帆向航行', '给船底涂防藤壶漆', '用蒸汽推动明轮'],
+                correct: 0,
+            },
+            {
+                theme: '海交馆',
+                question: '中国海外交通史博物馆主要展示的是哪类文物？',
+                options: ['古代海洋交通与贸易相关文物', '宫廷书画', '少数民族服饰'],
+                correct: 0,
+            },
+        ];
+
+        /** @type {{ min: number; seal: string; title: string; medal: string; glow: boolean; desc: string }[]} */
+        const TITLE_TIERS = [
+            { min: 140, seal: '卿', title: '海丝博识卿', medal: 'medal-gold', glow: true, desc: '博闻强识，贯通窑火、白瓷与帆影，堪称海丝小学者。' },
+            { min: 120, seal: '使', title: '刺桐远航使', medal: 'medal-gold', glow: true, desc: '熟稔港埠风物，可率舟队再探刺桐诸胜。' },
+            { min: 100, seal: '匠', title: '瓷韵匠心士', medal: 'medal-silver', glow: false, desc: '于窑火与瓷釉间已窥门径，假以时日必成大器。' },
+            { min: 80, seal: '客', title: '港埠访古客', medal: 'medal-silver', glow: false, desc: '足迹遍及三馆，尚需温故知新、再续航程。' },
+            { min: 60, seal: '童', title: '泉南研学童', medal: 'medal-bronze', glow: false, desc: '初识海丝风物，继续扬帆即可广见闻。' },
+            { min: 0, seal: '生', title: '丝路启航生', medal: 'medal-bronze', glow: false, desc: '航程已启，期待下次满载而归。' },
+        ];
+
+        const state = {
+            teamName: '',
+            score: 0,
+            currentQuestion: 0,
+            activeThemeId: 'yueji',
+            themePoints: 0,
+            completedThemes: /** @type {string[]} */ ([]),
+            themeScores: /** @type {Record<string, number>} */ ({}),
+        };
+
+        let toastTimer = null;
+        let pendingThemeSubmit = null;
+
+        function getThemeById(id) {
+            return THEMES.find((t) => t.id === id) ?? THEMES[0];
+        }
+
+        function getThemeForQuestionIndex(index) {
+            return THEMES.find((t) => index >= t.startIndex && index <= t.endIndex) ?? THEMES[0];
+        }
+
+        function loadProgress() {
+            try {
+                const raw = localStorage.getItem(PROGRESS_KEY);
+                if (!raw) return null;
+                return JSON.parse(raw);
+            } catch {
+                return null;
+            }
+        }
+
+        function saveProgress() {
+            localStorage.setItem(
+                PROGRESS_KEY,
+                JSON.stringify({
+                    teamName: state.teamName,
+                    completedThemes: state.completedThemes,
+                    themeScores: state.themeScores,
+                    totalScore: computeTotalFromThemes(),
+                }),
+            );
+        }
+
+        function computeTotalFromThemes() {
+            return THEMES.reduce((sum, t) => sum + (state.themeScores[t.id] ?? 0), 0);
+        }
+
+        function syncScoreFromProgress() {
+            state.score = computeTotalFromThemes();
+            const el = document.getElementById('score-display');
+            if (el) el.textContent = String(state.score);
+        }
+
+        function isThemeUnlocked(themeId) {
+            const idx = THEMES.findIndex((t) => t.id === themeId);
+            if (idx <= 0) return true;
+            const prev = THEMES[idx - 1];
+            return state.completedThemes.includes(prev.id);
+        }
+
+        function getNextPlayableThemeId() {
+            for (const theme of THEMES) {
+                if (!state.completedThemes.includes(theme.id)) return theme.id;
+            }
+            return null;
+        }
+
+        function getActiveViewId() {
+            const ids = ['view-start', 'view-hub', 'view-game', 'view-theme-done', 'view-result'];
+            for (const id of ids) {
+                if (!document.getElementById(id).classList.contains('hidden-section')) return id;
+            }
+            return 'view-start';
+        }
+
+        function initFromStorage() {
+            const saved = loadProgress();
+            if (!saved?.teamName) return;
+            state.teamName = saved.teamName;
+            state.completedThemes = saved.completedThemes ?? [];
+            state.themeScores = saved.themeScores ?? {};
+            syncScoreFromProgress();
+            const input = document.getElementById('team-input');
+            if (input) input.value = state.teamName;
+        }
+
+        initFromStorage();
+        refreshStartScreen();
+
+        if (/MicroMessenger/i.test(navigator.userAgent)) {
+            document.getElementById('wechat-tip')?.classList.remove('hidden-section');
+        }
+
+        (function showMirrorHint() {
+            const host = window.location.hostname;
+            const isVercel = host.includes('vercel.app');
+            const el = document.getElementById('mirror-hint');
+            if (!el) return;
+            const mirrors = window.HAISI_MIRROR_URLS || [];
+            if (!isVercel || mirrors.length === 0) return;
+            el.innerHTML =
+                '主站较慢时，可改用镜像：' +
+                mirrors.map((m) => `<a href="${m.url}" class="underline text-yuebai/70">${m.label}</a>`).join(' · ');
+        })();
+
+        function refreshStartScreen() {
+            const saved = loadProgress();
+            const btn = document.getElementById('btn-start');
+            const hint = document.getElementById('resume-hint');
+            if (!btn || !hint) return;
+
+            if (saved?.teamName) {
+                const input = document.getElementById('team-input');
+                if (input && !input.value.trim()) input.value = saved.teamName;
+                const nextId = (() => {
+                    const s = { completedThemes: saved.completedThemes ?? [], themeScores: saved.themeScores ?? {} };
+                    for (const theme of THEMES) {
+                        if (!s.completedThemes.includes(theme.id)) return theme.id;
+                    }
+                    return null;
+                })();
+                if (nextId) {
+                    const name = getThemeById(nextId).name;
+                    btn.textContent = '继续闯关';
+                    hint.textContent = `已存档：${saved.teamName} · 下一站「${name}」`;
+                    return;
+                }
+                if ((saved.completedThemes ?? []).length === THEMES.length) {
+                    btn.textContent = '查看最终称号';
+                    hint.textContent = `${saved.teamName} 已完成全程`;
+                    return;
+                }
+            }
+            btn.textContent = '扬帆起航';
+            hint.textContent = '扫码一次，三站各五题，玩完即得称号';
+        }
+
+        function showToast(message) {
+            const el = document.getElementById('toast');
+            el.textContent = message;
+            el.classList.add('is-visible');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('is-visible'), 2400);
+        }
+
+        function triggerPaperShake() {
+            const panel = document.getElementById('quiz-card-panel');
+            panel.classList.remove('paper-shake');
+            void panel.offsetWidth;
+            panel.classList.add('paper-shake');
+            panel.addEventListener('animationend', () => panel.classList.remove('paper-shake'), { once: true });
+        }
+
+        function stampWrongOption(btnElement) {
+            btnElement.classList.add('has-seal');
+            const seal = document.createElement('span');
+            seal.className = 'seal-mark';
+            seal.setAttribute('aria-hidden', 'true');
+            seal.textContent = '未中';
+            btnElement.appendChild(seal);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => seal.classList.add('is-stamped'));
+            });
+        }
+
+        function triggerPaperGlow() {
+            const panel = document.getElementById('quiz-card-panel');
+            panel.classList.remove('paper-glow');
+            void panel.offsetWidth;
+            panel.classList.add('paper-glow');
+            panel.addEventListener('animationend', () => panel.classList.remove('paper-glow'), { once: true });
+        }
+
+        function stampCorrectOption(btnElement) {
+            btnElement.classList.add('has-seal');
+            const seal = document.createElement('span');
+            seal.className = 'seal-mark seal-mark-correct';
+            seal.setAttribute('aria-hidden', 'true');
+            seal.textContent = '命中';
+            btnElement.appendChild(seal);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => seal.classList.add('is-stamped'));
+            });
+            triggerPaperGlow();
+        }
+
+        function getTitleTier(score) {
+            return TITLE_TIERS.find((t) => score >= t.min) ?? TITLE_TIERS[TITLE_TIERS.length - 1];
+        }
+
+        function startGame() {
+            const input = document.getElementById('team-input').value.trim();
+            if (!input) {
+                showToast('请先填写家庭名称');
+                document.getElementById('team-input').focus();
+                return;
+            }
+
+            state.teamName = input;
+            const saved = loadProgress();
+            if (!saved || saved.teamName !== input) {
+                state.completedThemes = [];
+                state.themeScores = {};
+                state.score = 0;
+            } else {
+                state.completedThemes = saved.completedThemes ?? [];
+                state.themeScores = saved.themeScores ?? {};
+                syncScoreFromProgress();
+            }
+            saveProgress();
+            startVoyage();
+        }
+
+        function startVoyage() {
+            const next = getNextPlayableThemeId();
+            if (next) {
+                enterTheme(next);
+                return;
+            }
+            if (state.completedThemes.length === THEMES.length) {
+                showResult();
+                return;
+            }
+            showHub();
+        }
+
+        function openHubFromStart() {
+            const input = document.getElementById('team-input').value.trim();
+            if (!input) {
+                showToast('请先填写家庭名称');
+                return;
+            }
+            state.teamName = input;
+            const saved = loadProgress();
+            if (saved?.teamName === input) {
+                state.completedThemes = saved.completedThemes ?? [];
+                state.themeScores = saved.themeScores ?? {};
+            }
+            showHub();
+        }
+
+        function continueVoyageFromHub() {
+            const next = getNextPlayableThemeId();
+            if (next) enterTheme(next);
+            else if (state.completedThemes.length === THEMES.length) showResult();
+        }
+
+        function pauseAtHub() {
+            showToast('进度已保存，可随时返回继续');
+            showHub();
+        }
+
+        function showHub() {
+            document.getElementById('hub-team-name').textContent = state.teamName;
+            document.getElementById('hub-total-score').textContent = String(computeTotalFromThemes());
+            renderThemeCards();
+            const next = getNextPlayableThemeId();
+            const cont = document.getElementById('hub-continue-btn');
+            if (next) {
+                cont.textContent = `继续 · ${getThemeById(next).name}`;
+                cont.classList.remove('hidden-section');
+            } else {
+                cont.classList.add('hidden-section');
+            }
+            switchView(getActiveViewId(), 'view-hub');
+        }
+
+        function renderThemeCards() {
+            const container = document.getElementById('theme-cards');
+            container.innerHTML = '';
+
+            THEMES.forEach((theme) => {
+                const done = state.completedThemes.includes(theme.id);
+                const unlocked = isThemeUnlocked(theme.id);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'theme-card';
+                if (done) btn.classList.add('is-done');
+                else if (unlocked) btn.classList.add('is-ready');
+                else btn.classList.add('is-locked');
+
+                const scoreText = done
+                    ? `已完成 · ${state.themeScores[theme.id] ?? 0} 分`
+                    : unlocked
+                      ? '可进入 · 共 5 题'
+                      : '请先完成上一驿站';
+
+                btn.innerHTML = `<div class="font-semibold tracking-[0.1em] text-songmo mb-1">${theme.name}</div>
+                    <div class="theme-card-status">${scoreText}</div>`;
+
+                btn.disabled = !unlocked || done;
+                if (unlocked && !done) {
+                    btn.onclick = () => enterTheme(theme.id);
+                }
+                container.appendChild(btn);
+            });
+
+            if (state.completedThemes.length === THEMES.length) {
+                const fin = document.createElement('button');
+                fin.type = 'button';
+                fin.className = 'btn-primary font-serif mt-2';
+                fin.textContent = '册封最终称号';
+                fin.onclick = () => showResult();
+                container.appendChild(fin);
+            }
+        }
+
+        function enterTheme(themeId) {
+            if (!isThemeUnlocked(themeId)) {
+                showToast('请先完成上一驿站');
+                showHub();
+                return;
+            }
+            if (state.completedThemes.includes(themeId)) {
+                showToast('本驿站已完成，请选择其他驿站');
+                showHub();
+                return;
+            }
+
+            const theme = getThemeById(themeId);
+            state.activeThemeId = themeId;
+            state.currentQuestion = theme.startIndex;
+            state.themePoints = 0;
+            document.getElementById('team-name-display').textContent = state.teamName;
+            syncScoreFromProgress();
+
+            switchView(getActiveViewId(), 'view-game');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = quizData[state.currentQuestion];
+            const theme = getThemeForQuestionIndex(state.currentQuestion);
+            const idxInTheme = state.currentQuestion - theme.startIndex;
+
+            document.getElementById('question-progress').textContent =
+                `${theme.name} · 第 ${idxInTheme + 1} / ${QUESTIONS_PER_THEME} 题`;
+            document.getElementById('question-tag').textContent = q.theme;
+            document.getElementById('question-text').textContent = q.question;
+            document.getElementById('progress-bar').style.width =
+                `${((idxInTheme + 1) / QUESTIONS_PER_THEME) * 100}%`;
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'option-btn flex items-start relative';
+                btn.innerHTML =
+                    `<span class="option-label">${String.fromCharCode(65 + index)}</span><span>${opt}</span>`;
+                btn.onclick = () => checkAnswer(index, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function showThemeCheckpoint() {
+            const theme = getThemeById(state.activeThemeId);
+            pendingThemeSubmit = {
+                themeId: theme.id,
+                themeScore: state.themePoints,
+                totalScore: computeTotalFromThemes() + state.themePoints,
+            };
+
+            document.getElementById('checkpoint-title').textContent = `${theme.name} · 通关`;
+            document.getElementById('checkpoint-subtitle').textContent = '本关五题已答完';
+            document.getElementById('checkpoint-theme-score').textContent = String(state.themePoints);
+            document.getElementById('checkpoint-total-score').textContent = String(pendingThemeSubmit.totalScore);
+            document.getElementById('checkpoint-hint').textContent = theme.travelHint;
+
+            const btn = document.getElementById('btn-complete-theme');
+            btn.disabled = false;
+            if (theme.nextId) {
+                const next = getThemeById(theme.nextId);
+                btn.textContent = `完成本关 · 继续${next.name}`;
+            } else {
+                btn.textContent = '完成全程 · 查看称号';
+            }
+
+            switchView('view-game', 'view-theme-done');
+        }
+
+        function completeThemeCheckpoint() {
+            if (!pendingThemeSubmit) return;
+
+            const { themeId, themeScore, totalScore } = pendingThemeSubmit;
+            const theme = getThemeById(themeId);
+
+            state.themeScores[themeId] = themeScore;
+            if (!state.completedThemes.includes(themeId)) {
+                state.completedThemes.push(themeId);
+            }
+            state.score = totalScore;
+            state.themePoints = 0;
+            saveProgress();
+
+            if (state.completedThemes.length === THEMES.length) {
+                showToast('全程完成！');
+                showResult();
+                return;
+            }
+
+            const nextId = theme.nextId;
+            if (nextId) {
+                showToast(`「${theme.name}」已完成`);
+                enterTheme(nextId);
+            } else {
+                showResult();
+            }
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            const qIndex = state.currentQuestion;
+            const theme = getThemeForQuestionIndex(qIndex);
+            const correctIndex = quizData[qIndex].correct;
+            const allBtns = document.getElementById('options-container').querySelectorAll('.option-btn');
+            allBtns.forEach((b) => { b.disabled = true; });
+
+            const isLastInTheme = qIndex === theme.endIndex;
+
+            if (selectedIndex === correctIndex) {
+                btnElement.classList.add('is-correct');
+                state.themePoints += POINTS_PER_QUESTION;
+                stampCorrectOption(btnElement);
+                document.getElementById('score-display').textContent =
+                    String(computeTotalFromThemes() + state.themePoints);
+            } else {
+                btnElement.classList.add('is-wrong');
+                allBtns[correctIndex].classList.add('is-correct');
+                triggerPaperShake();
+                stampWrongOption(btnElement);
+            }
+
+            setTimeout(() => {
+                if (isLastInTheme) {
+                    showThemeCheckpoint();
+                } else {
+                    state.currentQuestion += 1;
+                    renderQuestion();
+                }
+            }, 1400);
+        }
+
+        function applyTitleResult(score) {
+            const tier = getTitleTier(score);
+            const seal = document.getElementById('medal-seal');
+            const titleEl = document.getElementById('final-title');
+            const tierDesc = document.getElementById('result-tier');
+
+            seal.className = 'medal-seal mb-5 ' + tier.medal;
+            seal.textContent = tier.seal;
+            titleEl.textContent = tier.title;
+            titleEl.classList.toggle('title-glow', tier.glow);
+            tierDesc.textContent = tier.desc;
+        }
+
+        function showResult() {
+            const total = computeTotalFromThemes();
+            state.score = total;
+            document.getElementById('final-score').textContent = String(total);
+            document.getElementById('score-caption').textContent =
+                `满分 ${MAX_SCORE} 分 · 累计 ${total} 分`;
+            applyTitleResult(total);
+            const active = ['view-game', 'view-theme-done', 'view-hub'].find(
+                (id) => !document.getElementById(id).classList.contains('hidden-section'),
+            );
+            switchView(active || 'view-hub', 'view-result');
+        }
+
+        function switchView(hideId, showId) {
+            document.getElementById(hideId).classList.add('hidden-section');
+            const showElement = document.getElementById(showId);
+            showElement.classList.remove('hidden-section');
+            showElement.classList.remove('scroll-unfold');
+            void showElement.offsetWidth;
+            showElement.classList.add('scroll-unfold');
+        }
+
+        document.getElementById('team-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') startGame();
+        });
+
+    </script>
+</body>
+</html>

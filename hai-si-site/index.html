@@ -303,9 +303,12 @@
             box-shadow: 0 4px 14px rgba(20, 38, 52, 0.06);
         }
         .option-btn:not(:disabled):active { transform: scale(0.99); }
-        .option-btn:not(:disabled):hover {
-            border-color: var(--tianqing);
-            background: rgba(158, 197, 200, 0.12);
+        /* 仅鼠标设备显示 hover，避免手机未点击时第一项呈“已选中” */
+        @media (hover: hover) and (pointer: fine) {
+            .option-btn:not(:disabled):hover {
+                border-color: var(--tianqing);
+                background: rgba(158, 197, 200, 0.12);
+            }
         }
         .option-label {
             display: inline-flex;
@@ -864,7 +867,25 @@
             themePoints: 0,
             completedThemes: /** @type {string[]} */ ([]),
             themeScores: /** @type {Record<string, number>} */ ({}),
+            shuffledOptions: /** @type {string[]} */ ([]),
+            shuffledCorrect: 0,
         };
+
+        /** 随机打乱选项，返回新选项列表与正确项下标 */
+        function shuffleQuestionOptions(options, correctIndex) {
+            const items = options.map((text, i) => ({ text, i }));
+            for (let n = items.length - 1; n > 0; n--) {
+                const r = Math.floor(Math.random() * (n + 1));
+                const tmp = items[n];
+                items[n] = items[r];
+                items[r] = tmp;
+            }
+            let shuffledCorrect = 0;
+            items.forEach((item, idx) => {
+                if (item.i === correctIndex) shuffledCorrect = idx;
+            });
+            return { options: items.map((item) => item.text), correct: shuffledCorrect };
+        }
 
         let toastTimer = null;
         let pendingThemeSubmit = null;
@@ -1198,10 +1219,14 @@
             document.getElementById('progress-bar').style.width =
                 `${((idxInTheme + 1) / QUESTIONS_PER_THEME) * 100}%`;
 
+            const shuffled = shuffleQuestionOptions(q.options, q.correct);
+            state.shuffledOptions = shuffled.options;
+            state.shuffledCorrect = shuffled.correct;
+
             const container = document.getElementById('options-container');
             container.innerHTML = '';
 
-            q.options.forEach((opt, index) => {
+            state.shuffledOptions.forEach((opt, index) => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'option-btn flex items-start relative';
@@ -1270,7 +1295,7 @@
         function checkAnswer(selectedIndex, btnElement) {
             const qIndex = state.currentQuestion;
             const theme = getThemeForQuestionIndex(qIndex);
-            const correctIndex = quizData[qIndex].correct;
+            const correctIndex = state.shuffledCorrect;
             const allBtns = document.getElementById('options-container').querySelectorAll('.option-btn');
             allBtns.forEach((b) => { b.disabled = true; });
 
